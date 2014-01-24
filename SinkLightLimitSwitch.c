@@ -4,8 +4,8 @@
 #include "Sink_Lighting_Limit_Switch.h"
 
 struct CRGB { uint8_t g; uint8_t r; uint8_t b; };
-struct CRGB onled;
-struct CRGB offled;
+struct CRGB onled[1];
+struct CRGB offled[1];
 struct CRGB led[11];
 
 // IOPin limitSwitchTriggerPin;
@@ -26,26 +26,31 @@ void appInitHardware(void) {
 // Initialise the software
 TICK_COUNT appInitSoftware(TICK_COUNT loopStart){
 	
-	onled.r = 10;
-	onled.g = 10;
-	onled.b = 10;
+	onled[0].r = 60;
+	onled[0].g = 60;
+	onled[0].b = 60;
 	
-	offled.r = 0;
-	offled.g = 0;
-	offled.b = 0;
-
+	offled[0].r = 0;
+	offled[0].g = 0;
+	offled[0].b = 0;
+	
 	inactive = 0;
 	
+	cli();				// Disable interrupts. Can be removed if no interrupts are used.
 	for (i=0; i<11; i++) {
-		led[i] = onled;
+		led[i] = onled[0];
 	}
 	ws2812_sendarray((uint8_t *)&led[0], 33);
+	sei();				// Enable interrupts.
+	
 	delay_ms(1000);
 	
+	cli();				// Disable interrupts. Can be removed if no interrupts are used.
 	for (i=0; i<11; i++) {
-		led[i] = offled;
+		led[i] = offled[0];
 	}
 	ws2812_sendarray((uint8_t *)&led[0], 33);
+	sei();				// Enable interrupts.
 		
 	return 0;
 }
@@ -54,10 +59,12 @@ TICK_COUNT appControl(LOOP_COUNT loopCount, TICK_COUNT loopStart) {
 
 	if (SWITCH_pressed(&LimitSwitch)) {
 		
+		cli();				// Disable interrupts. Can be removed if no interrupts are used.
 		for (i=0; i<11; i++) {
-			led[i] = onled;
+			led[i] = onled[0];
 		}
 		ws2812_sendarray((uint8_t *)&led[0], 33);
+		sei();				// Enable interrupts.
 		status_on = TRUE;
 		inactive = 4000;
 		return 5000000; // wait 5 s
@@ -73,10 +80,12 @@ TICK_COUNT appControl(LOOP_COUNT loopCount, TICK_COUNT loopStart) {
 		
 		if (inactive > offtime){
 			
+			cli();				// Disable interrupts. Can be removed if no interrupts are used.
 			for (i=0; i<11; i++){
-				led[i] = offled;
+				led[i] = offled[0];
 			}
 			ws2812_sendarray((uint8_t *)&led[0],33);
+			sei();				// Enable interrupts.
 			
 			//pin_change_attach(B2, &limitSwitchTriggered, null);
 			status_on = FALSE;

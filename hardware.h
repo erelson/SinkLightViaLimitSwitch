@@ -56,6 +56,7 @@ extern const uint8_t NUM_ADC_CHANNELS;
 // ----------- My devices -----------------------
 extern SWITCH LimitSwitch;
 #define PID_sensor B1
+#define output B0
 
 void initHardware(void);
 #ifdef __cplusplus
